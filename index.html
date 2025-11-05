@@ -33,66 +33,19 @@
     label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
     input,select,textarea{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:8px;width:100%}
     .res-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .res-item{background:rgba(0,0,0,0.2);padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+    .res-item{background:rgba(0,0,0,0.2);padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
 
-    .mode-badge{font-size:13px;color:var(--muted);margin-left:8px}
-    footer{padding:12px 20px;color:var(--muted);font-size:13px}
+    .res-item > div:first-child { flex: 1 1 auto; min-width: 180px; word-wrap: break-word; overflow-wrap: anywhere; }
+    .res-item > div:last-child { flex-shrink: 0; display: flex; gap: 6px; }
 
-    .res-item {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.res-item > div:first-child {
-  flex: 1 1 auto;
-  min-width: 180px;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-}
-
-.res-item > div:last-child {
-  flex-shrink: 0;
-  display: flex;
-  gap: 6px;
-}
-
-/* === Индивидуальные цвета для пәндер (с приоритетом) === */
-.subject-item[data-name="Тарих"] {
-  background: #ff3300 !important;
-  color: #fff !important;
-}
-.subject-item[data-name="Математика"] {
-  background: #0008ff !important;
-  color: #fff !important;
-}
-.subject-item[data-name="Информатика"] {
-  background: #00878a !important;
-  color: #fff !important;
-}
-.subject-item[data-name="МС"] {
-  background: #00ffee !important;
-  color: #000 !important;
-}
-.subject-item[data-name="Тарих"]:hover {
-  box-shadow: 0 0 10px #ff3300aa !important;
-}
-.subject-item[data-name="Математика"]:hover {
-  box-shadow: 0 0 10px #0008ffaa !important;
-}
-.subject-item[data-name="Информатика"]:hover {
-  box-shadow: 0 0 10px #00878aaa !important;
-}
-.subject-item[data-name="МС"]:hover {
-  box-shadow: 0 0 10px #00ffeeaa !important;
-}
-
-
+    .subject-item[data-name="Тарих"] { background: #ff3300 !important; color: #fff !important; }
+    .subject-item[data-name="Математика"] { background: #0008ff !important; color: #fff !important; }
+    .subject-item[data-name="Информатика"] { background: #00878a !important; color: #fff !important; }
+    .subject-item[data-name="МС"] { background: #00ffee !important; color: #000 !important; }
+    .subject-item[data-name="Тарих"]:hover { box-shadow: 0 0 10px #ff3300aa !important; }
+    .subject-item[data-name="Математика"]:hover { box-shadow: 0 0 10px #0008ffaa !important; }
+    .subject-item[data-name="Информатика"]:hover { box-shadow: 0 0 10px #00878aaa !important; }
+    .subject-item[data-name="МС"]:hover { box-shadow: 0 0 10px #00ffeeaa !important; }
 
     .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(2,6,23,0.6),rgba(2,6,23,0.85));z-index:9999}
     .cardbox{background:#071022;padding:18px;border-radius:12px;min-width:320px}
@@ -128,7 +81,7 @@
     </main>
   </div>
 
-  <footer>Barлы деректер сенің браузеріңде сақталады. Құпияны редактор өзгере алады.</footer>
+  <footer>Барлық деректер сенің браузеріңде сақталады. Құпияны редактор өзгере алады.</footer>
 
   <!-- Login / role overlay -->
   <div id="loginOverlay" class="overlay">
@@ -168,14 +121,12 @@
 
 <script>
 (() => {
-  // Config
   const STORAGE_KEY = 'juz40tar_data_v1';
   const PASS_KEY = 'juz40tar_pass_v1';
   const LAST_KEY = 'juz40tar_last_v1';
-  const MAX_MONTHS = 7; const MAX_WEEKS = 4;
+  const MAX_MONTHS = 7, MAX_WEEKS = 4;
   const DEFAULT_PASS = '667667';
 
-  // Elements
   const loginOverlay = document.getElementById('loginOverlay');
   const roleView = document.getElementById('roleView');
   const roleEdit = document.getElementById('roleEdit');
@@ -198,7 +149,6 @@
   let data = null;
   let current = {subjectId:null, monthId:null, weekId:null};
 
-  // Helpers
   function loadData(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(!raw){ const base = {history:[],math:[],cs:[],ms:[]}; localStorage.setItem(STORAGE_KEY, JSON.stringify(base)); return base;} return JSON.parse(raw);}catch(e){console.error(e);return {history:[],math:[],cs:[],ms:[]}} }
   function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
   function loadPass(){ return localStorage.getItem(PASS_KEY) || DEFAULT_PASS; }
@@ -208,189 +158,151 @@
   function uid(p='id'){ return p + '_' + Math.random().toString(36).slice(2,9); }
   function esc(s){ if(!s) return ''; return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
 
-  // Init
-  function init(){ data = loadData(); const last = loadLast(); if(last.subjectId) current = last; renderSubjects(); updateModeLabel(); renderMain(); }
+  function init(){ ensureSubjects(); const last = loadLast(); if(last.subjectId) current = last; renderSubjects(); updateModeLabel(); renderMain(); }
 
-  // Role handlers
   roleView.addEventListener('click', ()=>{ isEditor=false; loginOverlay.style.display='none'; init(); });
-  roleEdit.addEventListener('click', ()=>{ const pass = localStorage.getItem(PASS_KEY) || DEFAULT_PASS; if(passInput.value.trim()===pass){ isEditor=true; loginOverlay.style.display='none'; init(); } else alert('Қате код'); });
+  roleEdit.addEventListener('click', ()=>{ const pass = loadPass(); if(passInput.value.trim()===pass){ isEditor=true; loginOverlay.style.display='none'; init(); } else alert('Қате код'); });
 
-  // Subjects
-  addSubjectBtn.addEventListener('click', ()=>{ if(!isEditor){ alert('Тек редактор қосады'); return; } const name = prompt('Пәннің атауы (мыс: Математика)') || 'Жаңа пән'; // add
-    const id = uid('s'); data[id] = data[id] || []; // don't use dynamic keys in data object, keep subjects as map? We'll store subjects array in separate structure
-    // For simplicity store subjects as array of objects under special key __subjects
-    if(!data.__subjects) data.__subjects = [];
-    data.__subjects.push({id,name,months:[]});
-    saveData(); renderSubjects(); });
+  addSubjectBtn.addEventListener('click', ()=>{ if(!isEditor){ alert('Тек редактор қосады'); return; } const name = prompt('Пәннің атауы (мыс: Математика)') || 'Жаңа пән'; const id = uid('s'); if(!data.__subjects) data.__subjects = []; data.__subjects.push({id,name,months:[]}); saveData(); renderSubjects(); });
 
-  function ensureSubjects(){ if(!data.__subjects){ // initialise default subjects
-      data.__subjects = [
-        {id:'history',name:'Тарих',months:[]},
-        {id:'math',name:'Математика',months:[]},
-        {id:'cs',name:'Информатика',months:[]},
-        {id:'ms',name:'МС',months:[]}
-      ]; saveData(); }
-  }
+  function ensureSubjects(){ if(!data.__subjects){ data.__subjects = [ {id:'history',name:'Тарих',months:[]}, {id:'math',name:'Математика',months:[]}, {id:'cs',name:'Информатика',months:[]}, {id:'ms',name:'МС',months:[]} ]; saveData(); } }
 
-  function renderSubjects(filter=''){ ensureSubjects(); subjectsList.innerHTML=''; const list = data.__subjects.filter(s=> s.name.toLowerCase().includes(filter.toLowerCase())); list.forEach(s=>{
-    const el = document.createElement('div'); el.className='subject-item'; el.innerHTML = `<div><strong>${esc(s.name)}</strong><div style="color:var(--muted)">Айлар: ${s.months.length}</div></div>`;
-    el.addEventListener('click', ()=>{ current.subjectId = s.id; current.monthId = null; current.weekId = null; saveLast(); renderMain(); });
-    subjectsList.appendChild(el);
-  });
-  // small hint for editor: manage subjects
-  if(isEditor){ const manage = document.createElement('div'); manage.style.marginTop='8px'; manage.innerHTML = '<button class="btn small" id="manageSubjectsBtn">Пәндерді басқару</button>'; subjectsList.appendChild(manage); document.getElementById('manageSubjectsBtn').addEventListener('click', manageSubjects); }
-  }
+  function renderSubjects(filter=''){ ensureSubjects(); subjectsList.innerHTML=''; const list = data.__subjects.filter(s=> s.name.toLowerCase().includes(filter.toLowerCase())); list.forEach(s=>{ const el = document.createElement('div'); el.className='subject-item'; el.innerHTML = `<div><strong>${esc(s.name)}</strong><div style="color:var(--muted)">Айлар: ${s.months.length}</div></div>`; el.addEventListener('click', ()=>{ current.subjectId = s.id; current.monthId = null; current.weekId = null; saveLast(); renderMain(); }); subjectsList.appendChild(el); }); if(isEditor){ const manage = document.createElement('div'); manage.style.marginTop='8px'; manage.innerHTML = '<button class="btn small" id="manageSubjectsBtn">Пәндерді басқару</button>'; subjectsList.appendChild(manage); document.getElementById('manageSubjectsBtn').addEventListener('click', manageSubjects); } }
 
-  function manageSubjects(){ // simple list with rename/delete
-    const html = data.__subjects.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div>${esc(s.name)}</div><div style="display:flex;gap:6px"><button class="btn ghost small" data-id="${s.id}" data-act="rename">Өңдеу</button><button class="btn ghost small" data-id="${s.id}" data-act="del">Өшіру</button></div></div>`).join('');
-    const ok = confirm('Пәндерді басқару: OK — тізім ашылады, Cancel — болдырмау'); if(!ok) return; const w = window.open('','_blank','width=520,height=620'); w.document.title='Пәндерді басқару'; w.document.body.style.background='#071022'; w.document.body.style.color='#e6eef8'; w.document.body.style.fontFamily='Inter,Arial'; w.document.body.innerHTML = `<div style="padding:12px"><h3>Пәндерді басқару</h3>${html}<div style="margin-top:12px"><button id="closeBtn">Жабу</button></div></div>`; w.document.getElementById('closeBtn').addEventListener('click', ()=> w.close()); // event handlers in popup are non-essential
-  }
+  function manageSubjects(){ const html = data.__subjects.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div>${esc(s.name)}</div><div style="display:flex;gap:6px"><button class="btn ghost small" data-id="${s.id}" data-act="rename">Өңдеу</button><button class="btn ghost small" data-id="${s.id}" data-act="del">Өшіру</button></div></div>`).join(''); const ok = confirm('Пәндерді басқару: OK — тізім ашылады, Cancel — болдырмау'); if(!ok) return; const w = window.open('','_blank','width=520,height=620'); w.document.title='Пәндерді басқару'; w.document.body.style.background='#071022'; w.document.body.style.color='#e6eef8'; w.document.body.style.fontFamily='Inter,Arial'; w.document.body.innerHTML = `<div style="padding:12px"><h3>Пәндерді басқару</h3>${html}<div style="margin-top:12px"><button id="closeBtn">Жабу</button></div></div>`; w.document.getElementById('closeBtn').addEventListener('click', ()=> w.close()); }
 
-  // Main content
-  function renderMain(){ ensureSubjects(); if(!current.subjectId){ mainContent.innerHTML = '<p style="color:var(--muted)">Пән таңдаңыз...</p>'; return; }
-    const subj = data.__subjects.find(x=>x.id===current.subjectId);
-    if(!subj) { current.subjectId=null; saveLast(); renderSubjects(); renderMain(); return; }
-    // header
-    let html = `<div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">${esc(subj.name)}</h2><div style="color:var(--muted)">Айлар: ${subj.months.length}</div></div>`;
-    if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn" id="addMonth">Ай қосу</button><button class="btn ghost" id="clearAll">Барлығын өшіру</button></div>`;
-    html += '</div>';
-    // months
-    html += '<div class="month-list" style="margin-top:12px">';
-    if(subj.months.length===0) html += '<p style="color:var(--muted)">Айлар жоқ — қосу арқылы қосыңыз.</p>';
-    subj.months.forEach((m,mi)=>{
-      html += `<div class="month-card"><div class="month-header"><div><strong>${esc(m.title)}</strong><div style="color:var(--muted)">Апталар: ${m.weeks.length}</div></div><div>`;
+  function renderMain(){ ensureSubjects(); if(!current.subjectId){ mainContent.innerHTML = '<p style="color:var(--muted)">Пән таңдаңыз...</p>'; return; } const subj = data.__subjects.find(x=>x.id===current.subjectId); if(!subj) { current.subjectId=null; saveLast(); renderSubjects(); renderMain(); return; } let html = `<div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">${esc(subj.name)}</h2><div style="color:var(--muted)">Айлар: ${subj.months.length}</div></div>`; if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn" id="addMonth">Ай қосу</button><button class="btn ghost" id="clearAll">Барлығын өшіру</button></div>`; html += '</div>'; html += '<div class="month-list" style="margin-top:12px">'; if(subj.months.length===0) html += '<p style="color:var(--muted)">Айлар жоқ — қосу арқылы қосыңыз.</p>'; subj.months.forEach((m,mi)=>{ html += `<div class="month-card"><div class="month-header"><div><strong>${esc(m.title)}</strong><div style="color:var(--muted)">Апталар: ${m.weeks.length}</div></div><div>`; if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn small" data-act="addWeek" data-mid="${m.id}">Апта қосу</button><button class="btn ghost small" data-act="delMonth" data-mid="${m.id}">Айды өшіру</button></div>`; html += `</div></div><div class="week-list">`; m.weeks.forEach((w,wi)=>{ html += `<div class="week-pill" data-mid="${m.id}" data-wid="${w.id}">${esc(w.title)}${isEditor? ' <small style="color:var(--muted)">×</small>':''}</div>`; }); html += '</div></div>'; }); html += '</div>'; mainContent.innerHTML = html;
 
-      if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn small" data-act="addWeek" data-mid="${m.id}">Апта қосу</button><button class="btn ghost small" data-act="delMonth" data-mid="${m.id}">Айды өшіру</button></div>`;
-      html += `</div></div><div class="week-list">`;
-      m.weeks.forEach((w,wi)=>{ html += `<div class="week-pill" data-mid="${m.id}" data-wid="${w.id}">${esc(w.title)}${isEditor? ' <small style="color:var(--muted)">×</small>':''}</div>`; });
-      html += '</div></div>';
-    });
-    html += '</div>';
-
-    mainContent.innerHTML = html;
-
-    // hook buttons
     if(isEditor){ document.getElementById('addMonth').addEventListener('click', ()=>{ addMonth(subj.id); }); document.getElementById('clearAll').addEventListener('click', ()=>{ if(confirm('Барлық айларды өшіру?')){ subj.months=[]; saveData(); renderSubjects(); renderMain(); } }); }
 
-    // add handlers for month-level buttons
     mainContent.querySelectorAll('[data-act="addWeek"]').forEach(btn=> btn.addEventListener('click', e=>{ const mid = e.currentTarget.dataset.mid; addWeek(subj.id, mid); }));
     mainContent.querySelectorAll('[data-act="delMonth"]').forEach(btn=> btn.addEventListener('click', e=>{ const mid = e.currentTarget.dataset.mid; if(confirm('Айды өшіру?')){ subj.months = subj.months.filter(mm=> mm.id!==mid); saveData(); renderSubjects(); renderMain(); } }));
 
-    // week click
     mainContent.querySelectorAll('.week-pill').forEach(p=> p.addEventListener('click', e=>{ const mid = p.dataset.mid; const wid = p.dataset.wid; openWeek(subj.id, mid, wid); }));
-
   }
 
   function addMonth(subjId){ const subj = data.__subjects.find(s=>s.id===subjId); if(!subj) return; if(subj.months.length>=MAX_MONTHS) return alert('Макс ай: ' + MAX_MONTHS); const num = subj.months.length+1; const m = {id:uid('m'), title:`Ай ${num}`, weeks:[]}; subj.months.push(m); saveData(); renderSubjects(); renderMain(); }
 
   function addWeek(subjId, monthId){ const subj = data.__subjects.find(s=>s.id===subjId); if(!subj) return; const m = subj.months.find(mm=>mm.id===monthId); if(!m) return; if(m.weeks.length>=MAX_WEEKS) return alert('Макс апта: ' + MAX_WEEKS); const num = m.weeks.length+1; const w = {id:uid('w'), title:`Апта ${num}`, resources:[]}; m.weeks.push(w); saveData(); renderSubjects(); renderMain(); }
 
-  function openWeek(subjId, monthId, weekId){ const subj = data.__subjects.find(s=>s.id===subjId); const m = subj.months.find(mm=>mm.id===monthId); const w = m.weeks.find(ww=>ww.id===weekId); current.subjectId = subjId; current.monthId = monthId; current.weekId = weekId; saveLast(); // render week editor/view
-    let html = `<div style="display:flex;justify-content:space-between;align-items:center"><div><h3 style="margin:0">${esc(subj.name)} — ${esc(m.title)} — ${esc(w.title)}</h3><div style="color:var(--muted)">Ресурстар: ${w.resources.length}</div></div>`;
-    if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn" id="addResBtn">Ресурс қосу</button><button class="btn ghost" id="delWeekBtn">Аптаны өшіру</button></div>`;
-    html += '</div>';
-    // resources list
+  function openWeek(subjId, monthId, weekId){
+    const subj = data.__subjects.find(s=>s.id===subjId);
+    const m = subj.months.find(mm=>mm.id===monthId);
+    const w = m.weeks.find(ww=>ww.id===weekId);
+    current.subjectId = subjId; current.monthId = monthId; current.weekId = weekId; saveLast();
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center"><div><h3 style="margin:0">${esc(subj.name)} — ${esc(m.title)} — ${esc(w.title)}</h3><div style="color:var(--muted)">Ресурстар: ${w.resources.length}</div></div>`; if(isEditor) html += `<div style="display:flex;gap:8px"><button class="btn" id="addResBtn">Ресурс қосу</button><button class="btn ghost" id="delWeekBtn">Аптаны өшіру</button></div>`; html += '</div>';
     html += '<div style="margin-top:12px">';
     if(w.resources.length===0) html += '<p style="color:var(--muted)">Ресурстар жоқ.</p>';
     else{ html += '<div class="res-list">'; w.resources.forEach(r=>{ html += `<div class="res-item"><div><strong>${esc(r.title)}</strong><div style="color:var(--muted)">${esc(r.url)}</div></div><div style="display:flex;gap:8px"><button class="btn ghost small" data-rid="${r.id}" data-act="open">Ашу</button><button class="btn ghost small" data-rid="${r.id}" data-act="copy">Көшіру</button><button class="btn ghost small" data-rid="${r.id}" data-act="del">Өшіру</button></div></div>`; }); html += '</div>'; }
     html += '</div>';
     mainContent.innerHTML = html;
 
-    if(isEditor){ document.getElementById('addResBtn').addEventListener('click', ()=>{ const title = prompt('Ресурс атауы (немесе бос қалдыру)') || ''; const url = prompt('URL (https://...)') || ''; if(!url) return alert('URL керек'); // add
-        w.resources.push({id:uid('r'), title: title||url, url}); saveData(); openWeek(subjId, monthId, weekId); });
-      document.getElementById('delWeekBtn').addEventListener('click', ()=>{ if(confirm('Аптаны өшіру?')){ m.weeks = m.weeks.filter(ww=>ww.id!==weekId); saveData(); renderSubjects(); renderMain(); } }); }
+    if(isEditor){
+      document.getElementById('addResBtn').addEventListener('click', ()=>{
+        const title = prompt('Ресурс атауы (немесе бос қалдыру)') || '';
+        const url = prompt('URL (https://...)') || ''; if(!url) return alert('URL керек');
+        w.resources.push({id:uid('r'), title: title||url, url}); saveData(); openWeek(subjId, monthId, weekId);
+      });
+      document.getElementById('delWeekBtn').addEventListener('click', ()=>{
+        if(confirm('Аптаны өшіру?')){ m.weeks = m.weeks.filter(ww=>ww.id!==weekId); saveData(); renderSubjects(); renderMain(); }
+      });
+    }
 
-    // resource buttons
     mainContent.querySelectorAll('[data-act="open"]').forEach(b=> b.addEventListener('click', e=>{ const rid = e.currentTarget.dataset.rid; const r = w.resources.find(rr=>rr.id===rid); if(r) window.open(r.url,'_blank'); }));
     mainContent.querySelectorAll('[data-act="copy"]').forEach(b=> b.addEventListener('click', e=>{ const rid = e.currentTarget.dataset.rid; const r = w.resources.find(rr=>rr.id===rid); if(r){ navigator.clipboard.writeText(r.url).then(()=> alert('Сілтеме көшірілді')); } }));
-    mainContent.querySelectorAll('[data-act="del"]').forEach(b=> b.addEventListener('click', e=>{ const rid = e.currentTarget.dataset.rid; if(confirm('Ресурсты өшіру?')){ m.weeks = m.weeks.map(ww=> ww.id===m.id? ww: ww); // noop
-        w.resources = w.resources.filter(rr=> rr.id!==rid); saveData(); openWeek(subjId, monthId, weekId); } }));
+    mainContent.querySelectorAll('[data-act="del"]').forEach(b=> b.addEventListener('click', e=>{ const rid = e.currentTarget.dataset.rid; if(confirm('Ресурсты өшіру?')){ w.resources = w.resources.filter(rr=> rr.id!==rid); saveData(); openWeek(subjId, monthId, weekId); } }));
   }
 
-  // Search
-  searchInput.addEventListener('input', e=>{ const q = e.target.value.trim().toLowerCase(); if(!q){ renderSubjects(); renderMain(); return; } // filter subjects by month/week/resource
-    ensureSubjects(); subjectsList.innerHTML=''; data.__subjects.forEach(s=>{ // find matches
-      const match = s.name.toLowerCase().includes(q) || s.months.some(m=> m.title.toLowerCase().includes(q) || m.weeks.some(w=> w.title.toLowerCase().includes(q) || w.resources.some(r=> r.title.toLowerCase().includes(q) || r.url.toLowerCase().includes(q) )));
-      if(match){ const el = document.createElement('div'); el.className='subject-item'; el.innerHTML = `<div><strong>${esc(s.name)}</strong><div style="color:var(--muted)">Айлар: ${s.months.length}</div></div>`; el.addEventListener('click', ()=>{ current.subjectId = s.id; current.monthId=null; current.weekId=null; saveLast(); renderMain(); }); subjectsList.appendChild(el); }
-    });
-  });
+  searchInput.addEventListener('input', e=>{ const q = e.target.value.trim().toLowerCase(); if(!q){ renderSubjects(); renderMain(); return; } ensureSubjects(); subjectsList.innerHTML=''; data.__subjects.forEach(s=>{ const match = s.name.toLowerCase().includes(q) || s.months.some(m=> m.title.toLowerCase().includes(q) || m.weeks.some(w=> w.title.toLowerCase().includes(q) || w.resources.some(r=> r.title.toLowerCase().includes(q) || r.url.toLowerCase().includes(q) ))); if(match){ const el = document.createElement('div'); el.className='subject-item'; el.innerHTML = `<div><strong>${esc(s.name)}</strong><div style="color:var(--muted)">Айлар: ${s.months.length}</div></div>`; el.addEventListener('click', ()=>{ current.subjectId = s.id; current.monthId=null; current.weekId=null; saveLast(); renderMain(); }); subjectsList.appendChild(el); } }); });
 
-  // Settings
   settingsBtn.addEventListener('click', ()=>{ if(!isEditor){ alert('Тек редактор баптай алады'); return; } settingsOverlay.style.display='flex'; currentPass.value = loadPass(); });
   closeSettings.addEventListener('click', ()=> settingsOverlay.style.display='none');
   savePassBtn.addEventListener('click', ()=>{ const np = newPass.value.trim(); if(!np) return alert('Жаңа код еңгізіңіз'); savePass(np); alert('Құпия жаңартылды'); currentPass.value = loadPass(); newPass.value=''; settingsOverlay.style.display='none'; });
 
-  // Utils
   function updateModeLabel(){ modeLabel.textContent = isEditor ? 'Режим: редактор' : 'Режим: көру'; }
 
-  // Start
-  window.addEventListener('load', ()=>{ // ensure password stored if not
+  // ==== Добавляем кнопки сохранения/загрузки ====
+  window.addEventListener('load', ()=>{
     if(!localStorage.getItem(PASS_KEY)) localStorage.setItem(PASS_KEY, DEFAULT_PASS);
     loginOverlay.style.display='flex';
+
+    // input для загрузки
+    const loadDataInput = document.createElement('input');
+    loadDataInput.type = 'file';
+    loadDataInput.style.display = 'none';
+    loadDataInput.accept = '.json';
+    document.body.appendChild(loadDataInput);
+
+    loadDataInput.addEventListener('change', e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        try{ data = JSON.parse(ev.target.result); saveData(); renderSubjects(); renderMain(); alert('Данные загружены!'); } 
+        catch(err){ alert('Ошибка при загрузке данных'); console.error(err); }
+      };
+      reader.readAsText(file);
+    });
+
+    
   });
 
-})();window.addEventListener('load', () => {
-  // Создаём невидимый input для загрузки JSON
-  const loadDataInput = document.createElement('input');
-  loadDataInput.type = 'file';
-  loadDataInput.style.display = 'none';
-  loadDataInput.accept = '.json';
-  document.body.appendChild(loadDataInput);
+})();
+// === GitHub Auto Save ===
+const GITHUB_TOKEN = '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';
+const REPO_OWNER = 'arnoldhkg';
+const REPO_NAME = 'arnoldkr';
+const FILE_PATH = 'data.json';
 
-  loadDataInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        data = JSON.parse(ev.target.result);
-        saveData(); // сохраняем в localStorage
-        renderSubjects();
-        renderMain();
-        alert('Данные загружены!');
-      } catch(err) {
-        alert('Ошибка при загрузке данных');
-        console.error(err);
-      }
-    };
-    reader.readAsText(file);
+// Получаем SHA файла, чтобы GitHub разрешил обновление
+async function getFileSHA() {
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}` }
   });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.sha;
+}
 
-  // Кнопки
-  const controlsDiv = document.createElement('div');
-  controlsDiv.style.display = 'flex';
-  controlsDiv.style.gap = '8px';
-  controlsDiv.style.marginTop = '12px';
+// Сохраняем данные на GitHub
+async function saveToGitHub() {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const sha = await getFileSHA();
 
-  const saveBtn = document.createElement('button');
-  saveBtn.textContent = '💾 Сохранить данные';
-  saveBtn.className = 'btn small';
-  saveBtn.onclick = () => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'juz40tar_data.json';
-    document.body.appendChild(a); // иногда нужно добавить в DOM
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const body = {
+    message: 'Автосохранение данных с сайта',
+    content,
+    sha
   };
 
-  const loadBtn = document.createElement('button');
-  loadBtn.textContent = '📂 Загрузить данные';
-  loadBtn.className = 'btn small';
-  loadBtn.onclick = () => loadDataInput.click();
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
 
-  controlsDiv.appendChild(saveBtn);
-  controlsDiv.appendChild(loadBtn);
+  if (res.ok) console.log('✅ Данные успешно сохранены на GitHub');
+  else console.error('❌ Ошибка сохранения в GitHub', await res.text());
+}
 
-  // Добавляем кнопки в sidebar
-  const sidebar = document.querySelector('.sidebar');
-  sidebar.appendChild(controlsDiv);
-});
+// Автосохранение при каждом изменении данных
+function autoSave() {
+  saveToGitHub();
+}
+
+// Пример: вызывать autoSave() в конце функций addSubject, addMonth, addWeek, addResource, deleteResource и т.д.
+// Например:
+function addSubject() {
+  const name = prompt('Пән атауы:');
+  if (!name) return;
+  data.__subjects.push({ id: uid('s'), name, months: [] });
+  saveData(); renderSubjects(); renderMain();
+  autoSave(); // <<< добавили автосохранение
+}
 
 </script>
 </body>
 </html>
-
